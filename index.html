@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Kitchen Simulation</title>
+    <style>
+      * { padding: 0; margin: 0; }
+      canvas { background: #eee; display: block; margin: 0 auto; }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" width="700" height="700"></canvas>
+    <script>
+    /*
+     * this script provides a mechanism for testing visualization
+     * methods for energy usage
+     * the visualization elements can be designed in anyway as long as they
+     * implement draw and update methods
+     */
+
+     /* catpure the canvas */
+     var canvas = document.getElementById("canvas");
+     /* define the context to draw in */
+     var ctx = canvas.getContext("2d");
+
+     canvas.width = 1500;
+     canvas.height = 1000;
+
+     /*
+      * class definition for a static pinwheel
+      */
+      function GrowingPinwheel(path,x,y,width,height){
+        this.img = new Image(),
+        this.img.src = path,
+        this.x = x,
+        this.y = y,
+        this.width = width,
+        this.height = height,
+        this.angle = 0,
+        this.grow = true,
+        this.applaince = null,
+        this.addAppliance = function(appliance){
+          this.appliance = appliance;
+        },
+        this.draw = function() {
+          ctx.save();
+          ctx.translate(this.x+this.width/2, this.y+this.height/2);
+          ctx.rotate(3.14*this.angle);
+          ctx.drawImage(this.img, -this.width/2, -this.height/2, this.width, this.height);
+          ctx.restore();
+        },
+        this.update = function() {
+          this.angle += 0.1;
+          /*if(this.grow){
+            this.width += 1;
+            this.height += 1;
+          } else {
+            this.width -= 1;
+            this.height -= 1;
+          }
+          if(this.width == 200){
+            this.grow = false;
+          }
+          if(this.width == 149){
+            this.grow = true;
+          }*/
+
+          /* get energy and power from appliance and update accordingly */
+          if(this.appliance){
+            alert("has appliance");
+          }
+        }
+      }
+
+      function Oven(){
+        this.running = false,
+        this.switchState = function() {
+          this.running = this.running ? false : true;
+        },
+        this.getEnergy = function() {
+          if(this.running){
+            /* do something here */
+          } else {
+            return 0;
+          }
+        },
+        this.getPower = function() {
+          if(this.running){
+            /* do something here */
+          } else {
+            return 0;
+          }
+        }
+      }
+
+      var s = 75;
+      var x = 100;
+      var y = 100;
+      var w = 150;
+      var h = 150;
+
+      var src = "https://tropicoolaircon.com/wp-content/uploads/2017/07/Aluminum-Fan-Blades-%E2%80%93-Hub-Type.png"
+      var p1 = new GrowingPinwheel(src,x,y,w,h);
+      var p2 = new GrowingPinwheel(src,x+1*(s+w),y,w,h);
+      var p3 = new GrowingPinwheel(src,x+2*(s+w),y,w,h);
+      var p4 = new GrowingPinwheel(src,x+3*(s+w),y,w,h);
+      var p5 = new GrowingPinwheel(src,x+4*(s+w),y,w,h);
+      var p6 = new GrowingPinwheel(src,x+5*(s+w),y,w,h);
+
+      var elems = new Array(p1,p2,p3,p4,p5,p6);
+
+      function draw(){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for(i = 0; i < elems.length; i++){
+          elems[i].draw();
+          elems[i].update();
+        }
+      }
+      setInterval(draw, 50);
+    </script>
+  </body>
+</html>
