@@ -24,6 +24,8 @@
      var ctx = canvas.getContext("2d");
      var refresh_rate = 20; /* milliseconds */
 
+     var lowest_energy = 20*refresh_rate/1000;
+
      canvas.width = 1500;
      canvas.height = 1000;
 
@@ -39,6 +41,7 @@
         this.height = height,
         this.power = 0,
         this.last_energy = 0,
+        this.last_size = 0,
         this.appliance = null,
         this.addAppliance = function(appliance){
           this.appliance = appliance;
@@ -57,12 +60,15 @@
           }
           /* energy */
           var current_energy = this.appliance.getEnergy();
-          var delta = (this.last_energy) ? Math.log(current_energy/this.last_energy+1) : Math.log(current_energy+1);
+          //var delta = (this.last_energy) ? Math.log(current_energy/this.last_energy+1) : Math.log(current_energy+1);
           //console.log(delta);
-          this.width = Math.sqrt(current_energy);
-          this.height = Math.sqrt(current_energy);
-          //this.x -= Math.log(current_energy+1)/2;
-          //this.y -= Math.log(current_energy+1)/2;
+          var size = 100*Math.log2(Math.sqrt(current_energy/lowest_energy)+1);
+          this.width = size;
+          this.height = size;
+          var center_change = (size - this.last_size)/2;
+          this.x -= center_change;
+          this.y -= center_change;
+          this.last_size = size;
           this.last_energy = current_energy;
           /* get energy and power from appliance and update accordingly */
 
@@ -77,7 +83,7 @@
         },
         this.getEnergy = function() {
           if(this.running){
-            this.energy += 2000;
+            this.energy += 2000*refresh_rate/1000;
           }
           return this.energy;
         },
@@ -97,7 +103,7 @@
         },
         this.getEnergy = function() {
           if(this.running){
-            this.energy += 20;
+            this.energy += 20*refresh_rate/1000;
           }
           return this.energy;
         },
@@ -109,12 +115,52 @@
           }
         }
       }
+      function Dishwasher(){
+        this.running = false,
+        this.energy = 0,
+        this.switchState = function() {
+          this.running = this.running ? false : true;
+        },
+        this.getEnergy = function() {
+          if(this.running){
+            this.energy += 500*refresh_rate/1000;
+          }
+          return this.energy;
+        },
+        this.getPower = function() {
+          if(this.running){
+            return 500;
+          } else {
+            return 0;
+          }
+        }
+      }
+      function Cooktop(){
+        this.running = false,
+        this.energy = 0,
+        this.switchState = function() {
+          this.running = this.running ? false : true;
+        },
+        this.getEnergy = function() {
+          if(this.running){
+            this.energy += 1500*refresh_rate/1000;
+          }
+          return this.energy;
+        },
+        this.getPower = function() {
+          if(this.running){
+            return 1500;
+          } else {
+            return 0;
+          }
+        }
+      }
 
       var s = 75;
       var x = 100;
       var y = 100;
-      var w = 150;
-      var h = 150;
+      var w = 100;
+      var h = 100;
 
 
       var p1 = new GrowingPinwheel("blue_pinwheel.png",x,y,w,h);
@@ -125,27 +171,35 @@
       var p6 = new GrowingPinwheel("yellow_pinwheel.png",x+5*(s+w),y,w,h);
 
       var oven = new Oven();
+      var dishwasher = new Dishwasher();
       var fridge = new Fridge();
+      var cooktop = new Cooktop();
 
       p1.addAppliance(oven);
-      p2.addAppliance(oven);
-      p3.addAppliance(oven);
-      p4.addAppliance(fridge);
-      p5.addAppliance(fridge);
-      p6.addAppliance(fridge);
+      p2.addAppliance(dishwasher);
+      p3.addAppliance(fridge);
+      p4.addAppliance(cooktop);
 
 
       oven.switchState();
+      dishwasher.switchState();
       fridge.switchState();
+      cooktop.switchState();
 
-      var elems = new Array(p1,p2,p3,p4,p5,p6);
+      var elems = new Array(p1,p2,p3,p4);
 
       function draw(){
+        //lowest_energy = elems[0].last_energy;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for(i = 0; i < elems.length; i++){
+        /*  if(elems[i].last_energy < lowest_energy){
+            lowest_energy = elems[i].last_energy;
+          }
+          */
           elems[i].draw();
           elems[i].update();
         }
+        lowest_energy += 20*refresh_rate/1000;
       }
       setInterval(draw, refresh_rate);
     </script>
