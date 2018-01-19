@@ -62,7 +62,7 @@
           var current_energy = this.appliance.getEnergy();
           //var delta = (this.last_energy) ? Math.log(current_energy/this.last_energy+1) : Math.log(current_energy+1);
           //console.log(delta);
-          var size = 100*Math.log2(Math.sqrt(current_energy/lowest_energy)+1);
+          var size = Math.max(100*Math.log2(Math.sqrt(current_energy/lowest_energy)+1),50);
           this.width = size;
           this.height = size;
           var center_change = (size - this.last_size)/2;
