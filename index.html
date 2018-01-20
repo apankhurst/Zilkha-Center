@@ -10,6 +10,10 @@
   </head>
   <body>
     <canvas id="canvas" width="700" height="700"></canvas>
+    <button id="oven">oven: off</button>
+    <button id="dishwasher">dishwasher: off</button>
+    <button id="fridge">fridge: off</button>
+    <button id="cooktop">cooktop: off</button>
     <script>
     /*
      * this script provides a mechanism for testing visualization
@@ -26,11 +30,11 @@
 
      var lowest_energy = 20*refresh_rate/1000;
 
-     canvas.width = 1500;
-     canvas.height = 1000;
+     canvas.width = 1100;
+     canvas.height = 500;
 
      /*
-      * class definition for a static pinwheel
+      * class definition for a growing pinwheel
       */
       function GrowingPinwheel(path,x,y,width,height){
         this.img = new Image(),
@@ -57,21 +61,18 @@
           /* power */
           if(this.appliance){
               this.power += this.appliance.getPower();
+              /* energy */
+              var current_energy = this.appliance.getEnergy();
+              var size = Math.max(100*Math.log2(Math.sqrt(current_energy/lowest_energy)+1),50);
+              this.width = size;
+              this.height = size;
+              var center_change = (size - this.last_size)/2;
+              this.x -= center_change;
+              this.y -= center_change;
+              this.last_size = size;
+              this.last_energy = current_energy;
+              /* get energy and power from appliance and update accordingly */
           }
-          /* energy */
-          var current_energy = this.appliance.getEnergy();
-          //var delta = (this.last_energy) ? Math.log(current_energy/this.last_energy+1) : Math.log(current_energy+1);
-          //console.log(delta);
-          var size = Math.max(100*Math.log2(Math.sqrt(current_energy/lowest_energy)+1),50);
-          this.width = size;
-          this.height = size;
-          var center_change = (size - this.last_size)/2;
-          this.x -= center_change;
-          this.y -= center_change;
-          this.last_size = size;
-          this.last_energy = current_energy;
-          /* get energy and power from appliance and update accordingly */
-
         }
       }
 
@@ -95,6 +96,7 @@
           }
         }
       }
+
       function Fridge(){
         this.running = false,
         this.energy = 0,
@@ -115,6 +117,7 @@
           }
         }
       }
+
       function Dishwasher(){
         this.running = false,
         this.energy = 0,
@@ -135,6 +138,7 @@
           }
         }
       }
+
       function Cooktop(){
         this.running = false,
         this.energy = 0,
@@ -157,8 +161,8 @@
       }
 
       var s = 75;
-      var x = 100;
-      var y = 100;
+      var x = 150;
+      var y = 150;
       var w = 100;
       var h = 100;
 
@@ -180,22 +184,51 @@
       p3.addAppliance(fridge);
       p4.addAppliance(cooktop);
 
+      /* capture the button actions */
+      var ovenButton = document.getElementById("oven");
+      var dishwasherButton = document.getElementById("dishwasher");
+      var fridgeButton = document.getElementById("fridge");
+      var cooktopButton = document.getElementById("cooktop");
 
-      oven.switchState();
-      dishwasher.switchState();
-      fridge.switchState();
-      cooktop.switchState();
+      /* setup button click events */
+      ovenButton.onclick = function ( ){
+        oven.switchState();
+        if(oven.running){
+          ovenButton.innerText = "oven: on";
+        } else {
+          ovenButton.innerText = "oven: off";
+        }
+      }
+      dishwasherButton.onclick = function ( ){
+        dishwasher.switchState();
+        if(dishwasher.running){
+          dishwasherButton.innerText = "dishwasher: on";
+        } else {
+          dishwasherButton.innerText = "dishwasher: off";
+        }
+      }
+      fridgeButton.onclick = function ( ){
+        fridge.switchState();
+        if(fridge.running){
+          fridgeButton.innerText = "fridge: on";
+        } else {
+          fridgeButton.innerText = "fridge: off";
+        }
+      }
+      cooktopButton.onclick = function ( ){
+        cooktop.switchState();
+        if(cooktop.running){
+          cooktopButton.innerText = "cooktop: on";
+        } else {
+          cooktopButton.innerText = "cooktop: off";
+        }
+      }
 
       var elems = new Array(p1,p2,p3,p4);
 
       function draw(){
-        //lowest_energy = elems[0].last_energy;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for(i = 0; i < elems.length; i++){
-        /*  if(elems[i].last_energy < lowest_energy){
-            lowest_energy = elems[i].last_energy;
-          }
-          */
           elems[i].draw();
           elems[i].update();
         }
