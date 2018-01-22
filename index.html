@@ -10,6 +10,12 @@
   </head>
   <body>
     <canvas id="canvas" width="700" height="700"></canvas>
+    <form>
+      <input type="image" id="oven" src="oven-md.png" />
+      <input type="button" id="dishwasher" value="DISHWASHER" />
+      <input type="button" id="fridge" value="FRIDGE" />
+      <input type="button" id="cooktop" value="COOKTOP" />
+    </form>
     <script>
     /*
      * this script provides a mechanism for testing visualization
@@ -27,7 +33,7 @@
      var lowest_energy = 20*refresh_rate/1000;
 
      canvas.width = 1500;
-     canvas.height = 1000;
+     canvas.height = 400;
 
      /*
       * class definition for a static pinwheel
@@ -62,7 +68,7 @@
           var current_energy = this.appliance.getEnergy();
           //var delta = (this.last_energy) ? Math.log(current_energy/this.last_energy+1) : Math.log(current_energy+1);
           //console.log(delta);
-          var size = Math.max(100*Math.log2(Math.sqrt(current_energy/lowest_energy)+1),50);
+          var size = Math.max(100*Math.log2(Math.sqrt(current_energy/lowest_energy)+1),30);
           this.width = size;
           this.height = size;
           var center_change = (size - this.last_size)/2;
@@ -180,13 +186,30 @@
       p3.addAppliance(fridge);
       p4.addAppliance(cooktop);
 
-
+      fridge.switchState();
+      /*
       oven.switchState();
       dishwasher.switchState();
-      fridge.switchState();
       cooktop.switchState();
+      */
 
       var elems = new Array(p1,p2,p3,p4);
+
+      document.getElementById('oven').onclick = function() {
+        oven.switchState();
+      }
+
+      document.getElementById('dishwasher').onclick = function() {
+        dishwasher.switchState();
+      }
+
+      document.getElementById('fridge').onclick = function() {
+        fridge.switchState();
+      }
+
+      document.getElementById('cooktop').onclick = function() {
+        cooktop.switchState();
+      }
 
       function draw(){
         //lowest_energy = elems[0].last_energy;
