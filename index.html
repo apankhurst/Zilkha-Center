@@ -9,12 +9,12 @@
     </style>
   </head>
   <body>
-    <canvas id="canvas" width="700" height="700"></canvas>
+    <canvas id="canvas" width="700" height="700" style="background-color:white"></canvas>
     <form>
-      <input type="image" id="oven" src="oven-md.png" />
-      <input type="button" id="dishwasher" value="DISHWASHER" />
-      <input type="button" id="fridge" value="FRIDGE" />
-      <input type="button" id="cooktop" value="COOKTOP" />
+      <input type="image" id="oven" src="oven.png" />
+      <input type="image" id="dishwasher" src="dishwasher.png" />
+      <input type="image" id="fridge" src="fridge.png" />
+      <input type="image" id="cooktop" src="cooktop.png" />
     </form>
     <script>
     /*
@@ -33,7 +33,7 @@
      var lowest_energy = 20*refresh_rate/1000;
 
      canvas.width = 1500;
-     canvas.height = 400;
+     canvas.height = 250;
 
      /*
       * class definition for a static pinwheel
@@ -197,18 +197,22 @@
 
       document.getElementById('oven').onclick = function() {
         oven.switchState();
+        return false;
       }
 
       document.getElementById('dishwasher').onclick = function() {
         dishwasher.switchState();
+        return false;
       }
 
       document.getElementById('fridge').onclick = function() {
         fridge.switchState();
+        return false;
       }
 
       document.getElementById('cooktop').onclick = function() {
         cooktop.switchState();
+        return false;
       }
 
       function draw(){
