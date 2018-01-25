@@ -24,34 +24,57 @@
      * implement draw and update methods
      */
 
-     /* catpure the canvas */
-     var canvas = document.getElementById("canvas");
-     /* define the context to draw in */
-     var ctx = canvas.getContext("2d");
-     var refresh_rate = 20; /* milliseconds */
+     /*----- GLOBAL VARIABLES -----*/
 
+     var canvas = document.getElementById("canvas"); /* catpure the canvas */
+     var ctx = canvas.getContext("2d"); /* define the context to draw in */
+
+     /* define how often updates will occur */
+     var refresh_rate = 20; /* milliseconds */
      var lowest_energy = 20*refresh_rate/1000;
 
-     canvas.width = 1500;
-     canvas.height = 250;
+     /* define a width and height for the canvas in pixels */
+     var canvas_width = 1500;
+     var canvas_height = 300;
+
+     /*----- VISUALIZATION CLASS DEFINITIONS -----*/
 
      /*
-      * class definition for a static pinwheel
+      * all visualizations must define 2 methods in addition to a constructor
+      * 1) draw - this method will be called once in the time period defined
+      *           by refresh_rate and should alter the appearance of the
+      *           object
+      * 2) update - this method will be called once in the time period defined
+      *             by refresh_rate and should alter the internal state of the
+      *             object based off of the energy and power values of the
+      *             object's associated appliance
+      */
+
+     /*
+      * this class deines a pinwheel that  will spin faster as its
+      * associated appliance uses more power and will grow as it uses more
+      * energy relative to the appliance using the least amount of energy
+      *
+      * the constructor takes an image path, x and y coordinates in pixels, and
+      * a width and height in pixels
       */
       function GrowingPinwheel(path,x,y,width,height){
-        this.img = new Image(),
+        this.img = new Image(), /* setup the image to draw */
         this.img.src = path,
-        this.x = x,
-        this.y = y,
-        this.width = width,
-        this.height = height,
-        this.power = 0,
-        this.last_energy = 0,
-        this.last_size = 0,
-        this.appliance = null,
+        this.x = x, /* assign the x coordinate */
+        this.y = y, /* assign the y coordinate */
+        this.width = width, /* assign the height coordinate */
+        this.height = height, /* assign the width coordinate */
+        this.power = 0, /* power used by associated appliances*/
+        this.last_energy = 0, /* energy used in last period by appliance */
+        this.last_size = 0, /* size of pinwheel in last period */
+        this.appliance = null, /* initialize the associated appliace as null */
+
+        /* assign an appliance to the pinwheel */
         this.addAppliance = function(appliance){
           this.appliance = appliance;
         },
+        /* rotate the pinwheel based off of the appliance's power */
         this.draw = function() {
           ctx.save();
           ctx.translate(this.x+this.width/2, this.y+this.height/2);
@@ -59,48 +82,73 @@
           ctx.drawImage(this.img, -this.width/2, -this.height/2, this.width, this.height);
           ctx.restore();
         },
+
+        /*
+         * get energy and power from the appiance and update internal state
+         * accordingly
+         */
         this.update = function() {
-          /* power */
+          /* get power */
           if(this.appliance){
               this.power += this.appliance.getPower();
           }
-          /* energy */
+
+          /*
+           * get energy and alter the size of the pinwheel
+           */
           var current_energy = this.appliance.getEnergy();
-          //var delta = (this.last_energy) ? Math.log(current_energy/this.last_energy+1) : Math.log(current_energy+1);
-          //console.log(delta);
           var size = Math.max(100*Math.log2(Math.sqrt(current_energy/lowest_energy)+1),30);
           this.width = size;
           this.height = size;
+
+          /* keep the pinwheel in the same position the entire time */
           var center_change = (size - this.last_size)/2;
           this.x -= center_change;
           this.y -= center_change;
+
+          /* store the previous state */
           this.last_size = size;
           this.last_energy = current_energy;
-          /* get energy and power from appliance and update accordingly */
-
         }
       }
 
-      function Oven(){
-        this.running = false,
-        this.energy = 0,
-        this.switchState = function() {
-          this.running = this.running ? false : true;
-        },
-        this.getEnergy = function() {
-          if(this.running){
-            this.energy += 2000*refresh_rate/1000;
+      /*----- APPLIANCE CLASS DEFINITIONS -----*/
+      /*
+       * all appliances must define 2 methods in addition to a constructor
+       * 1) getEnergy - this method will be called by a visualization object
+       *                once every refresh_rate to get the appliance's
+       *                energy usage
+       * 2) getPower - this method will be called by a visualization object
+       *                once every refresh_rate to get the appliance's
+       *                power usage
+       */
+
+
+       /*
+        * oven, fridge, dishwasher, and cooktop all do the same thing, just
+        * with different signatures
+        */
+       function Oven(){
+         this.running = false,
+         this.energy = 0,
+         this.switchState = function() {
+           this.running = this.running ? false : true;
+         },
+         this.getEnergy = function() {
+           if(this.running){
+             this.energy += 2000*refresh_rate/1000;
+           }
+           return this.energy;
+         },
+          this.getPower = function() {
+            if(this.running){
+              return 2000;
+            } else {
+              return 0;
+            }
           }
-          return this.energy;
-        },
-        this.getPower = function() {
-          if(this.running){
-            return 2000;
-          } else {
-            return 0;
-          }
-        }
       }
+
       function Fridge(){
         this.running = false,
         this.energy = 0,
@@ -121,6 +169,7 @@
           }
         }
       }
+
       function Dishwasher(){
         this.running = false,
         this.energy = 0,
@@ -141,6 +190,7 @@
           }
         }
       }
+
       function Cooktop(){
         this.running = false,
         this.energy = 0,
@@ -162,39 +212,41 @@
         }
       }
 
-      var s = 75;
-      var x = 100;
-      var y = 100;
+      /*----- SIMULATION SETUP -----*/
+
+      /* set up the canvas dimensions */
+      canvas.width = canvas_width;
+      canvas.height = canvas_height;
+
+
+      var s = 125;
+      var x = 150;
+      var y = 150;
       var w = 100;
       var h = 100;
 
-
+      /* initialize 4 pinwheels */
       var p1 = new GrowingPinwheel("blue_pinwheel.png",x,y,w,h);
       var p2 = new GrowingPinwheel("green_pinwheel.png",x+1*(s+w),y,w,h);
       var p3 = new GrowingPinwheel("orange_pinwheel.png",x+2*(s+w),y,w,h);
       var p4 = new GrowingPinwheel("purple_pinwheel.png",x+3*(s+w),y,w,h);
-      var p5 = new GrowingPinwheel("red_pinwheel.png",x+4*(s+w),y,w,h);
-      var p6 = new GrowingPinwheel("yellow_pinwheel.png",x+5*(s+w),y,w,h);
 
+      /* create 4 appliances */
       var oven = new Oven();
       var dishwasher = new Dishwasher();
       var fridge = new Fridge();
       var cooktop = new Cooktop();
 
+      /* tie the appliaces to the pinwheels */
       p1.addAppliance(oven);
       p2.addAppliance(dishwasher);
       p3.addAppliance(fridge);
       p4.addAppliance(cooktop);
 
-      fridge.switchState();
-      /*
-      oven.switchState();
-      dishwasher.switchState();
-      cooktop.switchState();
-      */
-
+      /* create an array of visualization objects */
       var elems = new Array(p1,p2,p3,p4);
 
+      /* turn the apprioriate appliance on when its icon is clicked */
       document.getElementById('oven').onclick = function() {
         oven.switchState();
         return false;
@@ -215,20 +267,17 @@
         return false;
       }
 
+      /*----- MAIN LOOP -----*/
       function draw(){
-        //lowest_energy = elems[0].last_energy;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         for(i = 0; i < elems.length; i++){
-        /*  if(elems[i].last_energy < lowest_energy){
-            lowest_energy = elems[i].last_energy;
-          }
-          */
           elems[i].draw();
           elems[i].update();
         }
         lowest_energy += 20*refresh_rate/1000;
       }
       setInterval(draw, refresh_rate);
+
     </script>
   </body>
 </html>
