@@ -131,20 +131,22 @@
          this.switchState = function() {
            this.running = this.running ? false : true;
          },
-         this.getEnergy = function() {
+         this.update = function() {
            if(this.running){
              this.energy += 2000*refresh_rate/1000;
            }
+         },
+         this.getEnergy = function() {
            return this.energy;
          },
-          this.getPower = function() {
-            if(this.running){
-              return 2000;
-            } else {
-              return 0;
-            }
-          }
-      }
+         this.getPower = function() {
+           if(this.running){
+             return 2000;
+           } else {
+             return 0;
+           }
+         }
+       }
 
       function Fridge(){
         this.running = false,
@@ -152,10 +154,12 @@
         this.switchState = function() {
           this.running = this.running ? false : true;
         },
-        this.getEnergy = function() {
+        this.update = function() {
           if(this.running){
             this.energy += 20*refresh_rate/1000;
           }
+        },
+        this.getEnergy = function() {
           return this.energy;
         },
         this.getPower = function() {
@@ -173,10 +177,12 @@
         this.switchState = function() {
           this.running = this.running ? false : true;
         },
-        this.getEnergy = function() {
+        this.update = function() {
           if(this.running){
             this.energy += 500*refresh_rate/1000;
           }
+        },
+        this.getEnergy = function() {
           return this.energy;
         },
         this.getPower = function() {
@@ -194,10 +200,12 @@
         this.switchState = function() {
           this.running = this.running ? false : true;
         },
-        this.getEnergy = function() {
+        this.update = function() {
           if(this.running){
             this.energy += 1500*refresh_rate/1000;
           }
+        },
+        this.getEnergy = function() {
           return this.energy;
         },
         this.getPower = function() {
@@ -233,10 +241,10 @@
       var h = starting_size;
 
       /* initialize 4 pinwheels */
-      var p1 = new GrowingPinwheel("images/blue_pinwheel.png",x,y,w,h);
-      var p2 = new GrowingPinwheel("images/green_pinwheel.png",x+max_size,y,w,h);
-      var p3 = new GrowingPinwheel("images/orange_pinwheel.png",x+2*max_size,y,w,h);
-      var p4 = new GrowingPinwheel("images/purple_pinwheel.png",x+3*max_size,y,w,h);
+      var p1 = new GrowingPinwheel("images/yellow_pinwheel.png",x,y,w,h);
+      var p2 = new GrowingPinwheel("images/purple_pinwheel.png",x+max_size,y,w,h);
+      var p3 = new GrowingPinwheel("images/blue_pinwheel.png",x+2*max_size,y,w,h);
+      var p4 = new GrowingPinwheel("images/red_pinwheel.png",x+3*max_size,y,w,h);
 
       /* create 4 appliances */
       var oven = new Oven();
@@ -253,6 +261,8 @@
       /* create an array of visualization objects */
       var elems = new Array(p1,p2,p3,p4);
 
+      /* create an array of appliances */
+      var appliances = new Array(oven,dishwasher,fridge, cooktop);
 
       /* capture the appliance buttons */
       var ovenButton = document.getElementById('oven');
@@ -320,6 +330,9 @@
       /*----- MAIN LOOP -----*/
       function draw(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for(i = 0; i < appliances.length; i++) {
+          appliances[i].update();
+        }
         for(i = 0; i < elems.length; i++){
           elems[i].draw();
           elems[i].update();
