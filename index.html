@@ -9,12 +9,12 @@
     </style>
   </head>
   <body>
-    <canvas id="canvas" width="700" height="700" style="background-color:white"></canvas>
+    <canvas id="canvas" width="700" height="700" style="background-color:black"></canvas>
     <form>
-      <input type="image" id="oven" src="oven.png" />
-      <input type="image" id="dishwasher" src="dishwasher.png" />
-      <input type="image" id="fridge" src="fridge.png" />
-      <input type="image" id="cooktop" src="cooktop.png" />
+      <input type="image" id="oven" src="images/oven_off.png" />
+      <input type="image" id="dishwasher" src="images/dishwasher_off.jpg" />
+      <input type="image" id="fridge" src="images/fridge_on.png" />
+      <input type="image" id="cooktop" src="images/cooktop_off.png" />
     </form>
     <script>
     /*
@@ -28,14 +28,11 @@
 
      var canvas = document.getElementById("canvas"); /* catpure the canvas */
      var ctx = canvas.getContext("2d"); /* define the context to draw in */
-
      /* define how often updates will occur */
      var refresh_rate = 20; /* milliseconds */
      var lowest_energy = 20*refresh_rate/1000;
 
-     /* define a width and height for the canvas in pixels */
-     var canvas_width = 1500;
-     var canvas_height = 300;
+
 
      /*----- VISUALIZATION CLASS DEFINITIONS -----*/
 
@@ -214,22 +211,32 @@
 
       /*----- SIMULATION SETUP -----*/
 
+      var window_width = window.innerWidth;
+      var window_height = window.innerHeight;
+
+      /* define a width and height for the canvas in pixels */
+      var canvas_width = window_width;
+      var canvas_height = window_height/2;
+
       /* set up the canvas dimensions */
       canvas.width = canvas_width;
       canvas.height = canvas_height;
 
 
-      var s = 125;
-      var x = 150;
-      var y = 150;
-      var w = 100;
-      var h = 100;
+      var num_pinwheels = 4;
+      var max_size = Math.min(canvas_height, canvas_width/num_pinwheels);
+      var starting_size = 100;
+
+      var x = max_size/2;
+      var y = max_size/2;
+      var w = starting_size;
+      var h = starting_size;
 
       /* initialize 4 pinwheels */
-      var p1 = new GrowingPinwheel("blue_pinwheel.png",x,y,w,h);
-      var p2 = new GrowingPinwheel("green_pinwheel.png",x+1*(s+w),y,w,h);
-      var p3 = new GrowingPinwheel("orange_pinwheel.png",x+2*(s+w),y,w,h);
-      var p4 = new GrowingPinwheel("purple_pinwheel.png",x+3*(s+w),y,w,h);
+      var p1 = new GrowingPinwheel("images/blue_pinwheel.png",x,y,w,h);
+      var p2 = new GrowingPinwheel("images/green_pinwheel.png",x+max_size,y,w,h);
+      var p3 = new GrowingPinwheel("images/orange_pinwheel.png",x+2*max_size,y,w,h);
+      var p4 = new GrowingPinwheel("images/purple_pinwheel.png",x+3*max_size,y,w,h);
 
       /* create 4 appliances */
       var oven = new Oven();
@@ -246,26 +253,69 @@
       /* create an array of visualization objects */
       var elems = new Array(p1,p2,p3,p4);
 
-      /* turn the apprioriate appliance on when its icon is clicked */
-      document.getElementById('oven').onclick = function() {
+
+      /* capture the appliance buttons */
+      var ovenButton = document.getElementById('oven');
+      var dishwasherButton = document.getElementById('dishwasher');
+      var fridgeButton = document.getElementById('fridge');
+      var cooktopButton = document.getElementById('cooktop');
+
+      /* format the appliance buttons */
+      ovenButton.width = max_size*.95;
+      ovenButton.height = max_size*.95;
+
+      dishwasherButton.width = max_size*.95;
+      dishwasherButton.height = max_size*.95;
+
+      fridgeButton.width = max_size*.95;
+      fridgeButton.height = max_size*.95;
+
+      cooktopButton.width = max_size*.95;
+      cooktopButton.height = max_size*.95;
+
+      /* define appliance behavior when appliance button is clicked */
+      ovenButton.onclick = function() {
         oven.switchState();
+        if(oven.running){
+          ovenButton.src = 'images/oven_on.png';
+        } else {
+          ovenButton.src = 'images/oven_off.png';
+        }
         return false;
       }
 
-      document.getElementById('dishwasher').onclick = function() {
+      dishwasherButton.onclick = function() {
         dishwasher.switchState();
+        if(dishwasher.running){
+          dishwasherButton.src = 'images/dishwasher_on.jpg';
+        }  else {
+          dishwasherButton.src = 'images/dishwasher_off.jpg';
+        }
         return false;
       }
 
-      document.getElementById('fridge').onclick = function() {
+      fridgeButton.onclick = function() {
         fridge.switchState();
+        if(fridge.running){
+          fridgeButton.src = 'images/fridge_on.png';
+        }  else {
+          fridgeButton.src = 'images/fridge_off.jpg';
+        }
         return false;
       }
 
-      document.getElementById('cooktop').onclick = function() {
+      cooktopButton.onclick = function() {
         cooktop.switchState();
+        if(cooktop.running){
+          cooktopButton.src = 'images/cooktop_on.png';
+        }  else {
+          cooktopButton.src = 'images/cooktop_off.png';
+        }
         return false;
       }
+
+      /* turn the fridge on */
+      fridge.switchState();
 
       /*----- MAIN LOOP -----*/
       function draw(){
